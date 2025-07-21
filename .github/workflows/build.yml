@@ -46,8 +46,12 @@ jobs:
 
       - name: Run build script
         run: |
+          # Ensure scripts directory exists
+          mkdir -p .github/scripts
+          # Make script executable
           chmod +x .github/scripts/build.sh
-          .github/scripts/build.sh ${{ steps.commit_info.outputs.branch_name }} ${{ steps.commit_info.outputs.commit_hash }}
+          # Run build script from project root
+          bash .github/scripts/build.sh ${{ steps.commit_info.outputs.branch_name }} ${{ steps.commit_info.outputs.commit_hash }}
 
       - name: Archive artifacts
         run: |
