@@ -28,9 +28,11 @@ jobs:
       - name: Install dependencies
         run: |
           echo "legacy-peer-deps=true" >> .npmrc
-          echo "node-options=--openssl-legacy-provider" >> .npmrc
-          npm install --no-optional
-
+          echo "node-options=--openssl-legacy-provider --max-old-space-size=4096" >> .npmrc
+          npm cache clean --force
+          npm install --no-optional --ignore-scripts
+          npm rebuild
+          
       - name: Extract version information
         id: version_info
         run: |
