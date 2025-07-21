@@ -26,7 +26,10 @@ jobs:
           sudo apt-get install -y libpng-dev build-essential autoconf automake libtool nasm libpng-dev pngquant
 
       - name: Install dependencies
-        run: npm install --no-optional
+        run: |
+          echo "legacy-peer-deps=true" >> .npmrc
+          echo "node-options=--openssl-legacy-provider" >> .npmrc
+          npm install --no-optional
 
       - name: Extract version information
         id: version_info
