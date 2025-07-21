@@ -1,0 +1,56 @@
+Sure, here's the contents for the file: .github/workflows/build.yml
+
+name: Build Content Editor
+
+on:
+  push:
+    branches:
+      - '**'
+
+# env:
+#   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Extract commit information
+        id: commit_info
+        run: |
+          echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+
+      - name: Clone plugins repository
+        run: |
+          git clone -b release-5.2.0 https://github.com/JeraldJF/sunbird-content-plugins.git plugins
+          cd plugins
+
+      - name: Run build script
+        run: |
+          chmod +x .github/scripts/build.sh
+          .github/scripts/build.sh ${{ env.BRANCH_NAME }} ${{ env.COMMIT_HASH }}
+
+      - name: Archive artifacts
+        run: |
+          mkdir generic-editor-artifacts
+          cp generic-editor.zip generic-editor-artifacts
+          zip -j generic-editor-artifacts.zip:${{ env.BRANCH_NAME }} generic-editor-artifacts/*
+          echo "{\"artifact_name\": \"generic-editor-artifacts.zip\", \"artifact_version\": \"${{ env.BRANCH_NAME }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: generic-editor-artifacts
+          path: generic-editor-artifacts.zip, metadata.json
