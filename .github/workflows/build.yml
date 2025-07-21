@@ -21,14 +21,21 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev build-essential
+
       - name: Install dependencies
         run: npm install
 
       - name: Extract commit information
         id: commit_info
         run: |
-          echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Clone plugins repository
         run: |
@@ -38,14 +45,14 @@ jobs:
       - name: Run build script
         run: |
           chmod +x .github/scripts/build.sh
-          .github/scripts/build.sh ${{ env.BRANCH_NAME }} ${{ env.COMMIT_HASH }}
+          .github/scripts/build.sh ${{ steps.commit_info.outputs.branch_name }} ${{ steps.commit_info.outputs.commit_hash }}
 
       - name: Archive artifacts
         run: |
           mkdir generic-editor-artifacts
           cp generic-editor.zip generic-editor-artifacts
-          zip -j generic-editor-artifacts.zip:${{ env.BRANCH_NAME }} generic-editor-artifacts/*
-          echo "{\"artifact_name\": \"generic-editor-artifacts.zip\", \"artifact_version\": \"${{ env.BRANCH_NAME }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
+          zip -j generic-editor-artifacts.zip:${{ steps.commit_info.outputs.branch_name }} generic-editor-artifacts/*
+          echo "{\"artifact_name\": \"generic-editor-artifacts.zip\", \"artifact_version\": \"${{ steps.commit_info.outputs.branch_name }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
