@@ -8,28 +8,31 @@ COMMIT_HASH=$2
 
 echo "Building generic editor for branch: $BRANCH_NAME commit: $COMMIT_HASH"
 
-# Set NODE_OPTIONS to handle the primordials issue
-export NODE_OPTIONS="--no-global-search-paths --require graceful-fs"
-
 # Clean install dependencies
+echo "Cleaning npm cache and node_modules..."
 rm -rf node_modules package-lock.json
 npm cache clean --force
 
-# Install dependencies with legacy peer deps and no optional
+# Install specific versions of critical dependencies first
+echo "Installing specific webpack versions..."
+npm install webpack@4.46.0 webpack-cli@3.3.12 graceful-fs@4.2.0 --save-dev
+
+# Install remaining dependencies
+echo "Installing project dependencies..."
 npm install --legacy-peer-deps --no-optional
 
-# Run build commands with specific webpack version
-echo "Installing webpack and webpack-cli"
-npm install webpack@4.46.0 webpack-cli@3.3.12 --save-dev
+# Apply patch for primordials issue
+echo "Applying fixes for Node.js compatibility..."
+npm install natives@1.1.6 --save-dev
 
-# Run build with node options
+# Run build command
 echo "Running build command..."
 if [ -f "webpack.config.js" ]; then
     echo "Using webpack.config.js"
-    ./node_modules/.bin/webpack --config webpack.config.js --mode=production
+    NODE_ENV=production ./node_modules/.bin/webpack --config webpack.config.js
 else
-    echo "No webpack config found, using default build command"
-    npm run build
+    echo "No webpack config found, falling back to gulp"
+    ./node_modules/.bin/gulp
 fi
 
 # Create zip file of the build
