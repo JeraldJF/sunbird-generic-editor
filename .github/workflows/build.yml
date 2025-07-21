@@ -70,16 +70,13 @@ jobs:
       - name: Archive artifacts
         run: |
           mkdir generic-editor-artifacts
-          cp generic-editor.zip generic-editor-artifacts/
-          cd generic-editor-artifacts
-          zip -j "../generic-editor-artifacts.zip:${{ steps.version_info.outputs.version }}" *
-          cd ..
-          echo "{\"artifact_name\": \"generic-editor-artifacts.zip\", \"artifact_version\": \"${{ steps.version_info.outputs.version }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
+          cp generic-editor.zip "generic-editor-artifacts/generic-editor-${{ steps.version_info.outputs.version }}.zip"
+          echo "{\"artifact_name\": \"generic-editor-${{ steps.version_info.outputs.version }}.zip\", \"artifact_version\": \"${{ steps.version_info.outputs.version }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: "generic-editor-artifacts-${{ steps.version_info.outputs.version }}"
+          name: "generic-editor-${{ steps.version_info.outputs.version }}"
           path: |
-            generic-editor-artifacts.zip:${{ steps.version_info.outputs.version }}
+            generic-editor-artifacts/
             metadata.json
