@@ -48,7 +48,7 @@ jobs:
           echo "{\"artifact_name\": \"generic-editor-artifacts.zip\", \"artifact_version\": \"${{ env.BRANCH_NAME }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: generic-editor-artifacts
           path: generic-editor-artifacts.zip, metadata.json
