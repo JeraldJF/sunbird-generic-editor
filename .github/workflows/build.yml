@@ -1,12 +1,11 @@
-name: Build Content Editor
+name: Build Generic Editor
 
 on:
   push:
     branches:
       - '**'
-
-# env:
-#   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -24,49 +23,59 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libpng-dev build-essential autoconf automake libtool nasm libpng-dev
-          # Pre-build setup for pngquant
-          sudo apt-get install -y pngquant
+          sudo apt-get install -y libpng-dev build-essential autoconf automake libtool nasm libpng-dev pngquant
 
       - name: Install dependencies
         run: npm install --no-optional
 
-      - name: Extract commit information
-        id: commit_info
+      - name: Extract version information
+        id: version_info
         run: |
           COMMIT_HASH=$(git rev-parse --short HEAD)
-          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # If this is a tag, use it as version
+            VERSION="${{ github.ref_name }}"
+            BRANCH_NAME=$(echo "$VERSION" | cut -d'_' -f1 | cut -d'.' -f1,2)
+          else
+            # If this is a branch
+            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            VERSION="${BRANCH_NAME}_${COMMIT_HASH}"
+          fi
           echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Clone plugins repository
+      - name: Clone and checkout plugins
         run: |
-          git clone -b release-5.2.0 https://github.com/JeraldJF/sunbird-content-plugins.git plugins
+          git clone https://github.com/JeraldJF/sunbird-content-plugins.git plugins
           cd plugins
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # For tags, find the latest matching tag
+            CHECKOUT_TAG=$(git ls-remote --tags origin ${{ steps.version_info.outputs.branch_name }}* | grep -o "${{ steps.version_info.outputs.branch_name }}.*" | sort -V | tail -n1)
+            git checkout tags/${CHECKOUT_TAG} -b ${CHECKOUT_TAG}
+          else
+            # For branches, checkout the matching branch
+            git checkout origin/${{ steps.version_info.outputs.branch_name }} -b ${{ steps.version_info.outputs.branch_name }}
+          fi
 
       - name: Run build script
         run: |
-          # Ensure we're in the project root
-          cd $GITHUB_WORKSPACE
-          
-          # Ensure scripts directory exists
-          mkdir -p .github/scripts
-          
-          # Make script executable
-          chmod +x .github/scripts/build.sh
-          
-          # Run build script from project root with debug output
-          bash -x .github/scripts/build.sh ${{ steps.commit_info.outputs.branch_name }} ${{ steps.commit_info.outputs.commit_hash }}
+          chmod 777 build.sh
+          bash build.sh ${{ steps.version_info.outputs.branch_name }} ${{ steps.version_info.outputs.commit_hash }} false
 
       - name: Archive artifacts
         run: |
           mkdir generic-editor-artifacts
-          cp generic-editor.zip generic-editor-artifacts
-          zip -j generic-editor-artifacts.zip:${{ steps.commit_info.outputs.branch_name }} generic-editor-artifacts/*
-          echo "{\"artifact_name\": \"generic-editor-artifacts.zip\", \"artifact_version\": \"${{ steps.commit_info.outputs.branch_name }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
+          cp generic-editor.zip generic-editor-artifacts/
+          cd generic-editor-artifacts
+          zip -j "../generic-editor-artifacts.zip:${{ steps.version_info.outputs.version }}" *
+          cd ..
+          echo "{\"artifact_name\": \"generic-editor-artifacts.zip\", \"artifact_version\": \"${{ steps.version_info.outputs.version }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: generic-editor-artifacts
-          path: generic-editor-artifacts.zip, metadata.json
+          name: "generic-editor-artifacts-${{ steps.version_info.outputs.version }}"
+          path: |
+            generic-editor-artifacts.zip:${{ steps.version_info.outputs.version }}
+            metadata.json

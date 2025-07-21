@@ -1,6 +1,6 @@
 #!/bin/bash
 STARTTIME=$(date +%s)
-NODE_VERSION=10.24.1
+NODE_VERSION=12.22.12
 branch_name=$1
 commit_hash=$2
 runTest=$3
@@ -15,7 +15,11 @@ nvm use $NODE_VERSION
 export version_number=$branch_name
 export build_number=$commit_hash
 rm -rf generic-editor
-sudo apt-get install build-essential libpng-dev
+
+# Install global dependencies if not present
+which bower || npm install -g bower
+which gulp || npm install -g gulp
+
 node -v
 npm -v 
 npm install
@@ -26,8 +30,7 @@ cd ..
 gulp packageCorePlugins
 npm run plugin-build
 npm run build
-#gulp build
-if [ $runTest == true ]
-then
+
+if [ "$runTest" = "true" ]; then
     npm run test
 fi
