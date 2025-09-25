@@ -1,0 +1,81 @@
+name: Build Generic Editor
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '12.22.12'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev build-essential autoconf automake libtool nasm libpng-dev pngquant
+
+      - name: Install dependencies
+        run: |
+          echo "legacy-peer-deps=true" >> .npmrc
+          echo "node-options=--max-old-space-size=4096" >> .npmrc
+          npm cache clean --force
+          npm install --no-optional
+          
+      - name: Extract version information
+        id: version_info
+        run: |
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # If this is a tag, use it as version
+            VERSION="${{ github.ref_name }}"
+            BRANCH_NAME=$(echo "$VERSION" | cut -d'_' -f1 | cut -d'.' -f1,2)
+          else
+            # If this is a branch
+            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            VERSION="${BRANCH_NAME}_${COMMIT_HASH}"
+          fi
+          echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Clone and checkout plugins
+        run: |
+          git clone https://github.com/JeraldJF/sunbird-content-plugins.git plugins
+          cd plugins
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # For tags, find the latest matching tag
+            CHECKOUT_TAG=$(git ls-remote --tags origin ${{ steps.version_info.outputs.branch_name }}* | grep -o "${{ steps.version_info.outputs.branch_name }}.*" | sort -V | tail -n1)
+            git checkout tags/${CHECKOUT_TAG} -b ${CHECKOUT_TAG}
+          else
+            # For branches, checkout the matching branch
+            git checkout origin/${{ steps.version_info.outputs.branch_name }} -b ${{ steps.version_info.outputs.branch_name }}
+          fi
+
+      - name: Run build script
+        run: |
+          chmod 777 build.sh
+          bash build.sh ${{ steps.version_info.outputs.branch_name }} ${{ steps.version_info.outputs.commit_hash }} false
+
+      - name: Archive artifacts
+        run: |
+          mkdir generic-editor-artifacts
+          cp generic-editor.zip "generic-editor-artifacts/generic-editor-${{ steps.version_info.outputs.version }}.zip"
+          echo "{\"artifact_name\": \"generic-editor-${{ steps.version_info.outputs.version }}.zip\", \"artifact_version\": \"${{ steps.version_info.outputs.version }}\", \"node_name\": \"${{ runner.name }}\"}" > metadata.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: "generic-editor-${{ steps.version_info.outputs.version }}"
+          path: |
+            generic-editor-artifacts/
+            metadata.json

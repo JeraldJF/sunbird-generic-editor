@@ -1,0 +1,15 @@
+diff --git a/polyfills.js b/polyfills.js
+index 091056f..e436626 100644
+--- a/polyfills.js
++++ b/polyfills.js
+@@ -1,3 +1,10 @@
++var fs = require('fs')
++if (!fs.chmod || !fs.fchmod) {
++  fs.chmod = fs.fchmod = function (a, b, c) {
++    if (typeof c === 'function') c()
++  }
++}
++
+ var constants = require('constants')
+ 
+ var origCwd = process.cwd

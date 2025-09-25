@@ -3,6 +3,8 @@
  * @version webpack 4
  */
 
+require('dotenv').config();
+
 const ENVIRONMENT = process.env.NODE_ENV;
 const BUILD_NUMBER = process.env.build_number;
 const EDITOR_VER = process.env.version_number;
