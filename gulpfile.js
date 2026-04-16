@@ -22,7 +22,7 @@ if (!versionNumber && !buildNumber) {
     process.exit(1);
 }
 var versionPrefix = '.' + versionNumber + '.' + buildNumber;
-var cachebust = function(path) {
+var cachebust = function (path) {
     path.basename += versionPrefix
 }
 
@@ -74,7 +74,7 @@ var corePlugins = [
 
 // ─── Leaf tasks (no dependencies on other named tasks) ────────────────────────
 
-gulp.task('minifyCE', function() {
+gulp.task('minifyCE', function () {
     return gulp.src(scriptfiles)
         .pipe(concat('genericeditor.min.js'))
         .pipe(minify({
@@ -88,28 +88,28 @@ gulp.task('minifyCE', function() {
         .pipe(gulp.dest('generic-editor/scripts'));
 });
 
-gulp.task('minifyCSS', function() {
+gulp.task('minifyCSS', function () {
     return gulp.src([
-            'app/styles/semantic.min.css',
-            'app/styles/content-editor.css',
-            'app/styles/MyFontsWebfontsKit.css',
-            'app/styles/iconfont.css',
-            'app/styles/noto.css',
-            'app/styles/css/header.css',
-            'app/styles/css/container.css',
-            'app/styles/css/commonStyles.css',
-            'app/styles/fonts/notosans-bengali/notosansbengali.css',
-            'app/styles/fonts/notosans-malayalam/notosansmalayalam.css',
-            'app/styles/fonts/notosans-gurmukhi/notosansgurmukhi.css',
-            'app/styles/fonts/notosans-devanagari/notosansdevanagari.css',
-            'app/styles/fonts/notosans-gujarati/notosansgujarati.css',
-            'app/styles/fonts/notosans-telugu/notosanstelugu.css',
-            'app/styles/fonts/notosans-tamil/notosanstamil.css',
-            'app/styles/fonts/notosans-kannada/notosanskannada.css',
-            'app/styles/fonts/notosans-oriya/notosansoriya.css',
-            'app/styles/fonts/noto-nastaliqurdu/notonastaliqurdu.css',
-            'app/styles/fonts-override.css'
-        ])
+        'app/styles/semantic.min.css',
+        'app/styles/content-editor.css',
+        'app/styles/MyFontsWebfontsKit.css',
+        'app/styles/iconfont.css',
+        'app/styles/noto.css',
+        'app/styles/css/header.css',
+        'app/styles/css/container.css',
+        'app/styles/css/commonStyles.css',
+        'app/styles/fonts/notosans-bengali/notosansbengali.css',
+        'app/styles/fonts/notosans-malayalam/notosansmalayalam.css',
+        'app/styles/fonts/notosans-gurmukhi/notosansgurmukhi.css',
+        'app/styles/fonts/notosans-devanagari/notosansdevanagari.css',
+        'app/styles/fonts/notosans-gujarati/notosansgujarati.css',
+        'app/styles/fonts/notosans-telugu/notosanstelugu.css',
+        'app/styles/fonts/notosans-tamil/notosanstamil.css',
+        'app/styles/fonts/notosans-kannada/notosanskannada.css',
+        'app/styles/fonts/notosans-oriya/notosansoriya.css',
+        'app/styles/fonts/noto-nastaliqurdu/notonastaliqurdu.css',
+        'app/styles/fonts-override.css'
+    ])
         .pipe(concat('style.min.css'))
         .pipe(minify({
             minify: true,
@@ -117,7 +117,7 @@ gulp.task('minifyCSS', function() {
             conservativeCollapse: true,
             minifyJS: true,
             minifyCSS: true,
-            getKeptComment: function(content, filePath) {
+            getKeptComment: function (content, filePath) {
                 var m = content.match(/\/\*![\s\S]*?\*\//img);
                 return m && m.join('\n') + '\n' || '';
             }
@@ -126,7 +126,7 @@ gulp.task('minifyCSS', function() {
         .pipe(gulp.dest('generic-editor/styles'));
 });
 
-gulp.task('minifyJsBower', function() {
+gulp.task('minifyJsBower', function () {
     return gulp.src(bower_components)
         .pipe(concat('external.min.js'))
         .pipe(minify({
@@ -140,7 +140,7 @@ gulp.task('minifyJsBower', function() {
         .pipe(gulp.dest('generic-editor/scripts/'));
 });
 
-gulp.task('minifyCssBower', function() {
+gulp.task('minifyCssBower', function () {
     return gulp.src(bower_css)
         .pipe(concat('external.min.css'))
         .pipe(minify({
@@ -149,7 +149,7 @@ gulp.task('minifyCssBower', function() {
             conservativeCollapse: true,
             minifyJS: true,
             minifyCSS: true,
-            getKeptComment: function(content, filePath) {
+            getKeptComment: function (content, filePath) {
                 var m = content.match(/\/\*![\s\S]*?\*\//img);
                 return m && m.join('\n') + '\n' || '';
             }
@@ -158,71 +158,71 @@ gulp.task('minifyCssBower', function() {
         .pipe(gulp.dest('generic-editor/styles'));
 });
 
-gulp.task('copycommonfonts', function() {
+gulp.task('copycommonfonts', function () {
     return gulp.src(['app/styles/themes/**/*', 'app/styles/webfonts/**/*', 'app/styles/fonts/**/*'], {
-            base: 'app/styles/'
-        })
+        base: 'app/styles/'
+    })
         .pipe(gulp.dest('generic-editor/styles'));
 });
 
-gulp.task('copyfontawesomefonts', function() {
+gulp.task('copyfontawesomefonts', function () {
     return gulp.src(['app/bower_components/font-awesome/fonts/fontawesome-webfont.ttf', 'app/bower_components/font-awesome/fonts/fontawesome-webfont.woff'], {
-            base: 'app/bower_components/font-awesome/fonts/'
-        })
+        base: 'app/bower_components/font-awesome/fonts/'
+    })
         .pipe(gulp.dest('generic-editor/styles/fonts'));
 });
 
-gulp.task('copyFiles', function() {
+gulp.task('copyFiles', function () {
     return gulp.src(['app/images/editor-frame.png', 'app/config/*.json', 'app/index.html'], {
-            base: 'app/'
-        })
+        base: 'app/'
+    })
         .pipe(gulp.dest('generic-editor'));
 });
 
-gulp.task('copydeploydependencies', function() {
+gulp.task('copydeploydependencies', function () {
     return gulp.src(['deploy/gulpfile.js', 'deploy/package.json'], {
-            base: ''
-        })
+        base: ''
+    })
         .pipe(gulp.dest('generic-editor'));
 });
 
-gulp.task('addDir', function() {
-    return gulp.src('*.*', {read: false})
-       .pipe(gulp.dest('./generic-editor/scripts'))
+gulp.task('addDir', function () {
+    return gulp.src('*.*', { read: false })
+        .pipe(gulp.dest('./generic-editor/scripts'))
 });
 
-gulp.task('minifyCorePlugins', function() {
+gulp.task('minifyCorePlugins', function () {
     var tasks = [];
-    corePlugins.forEach(function(plugin) {
+    corePlugins.forEach(function (plugin) {
         tasks.push(
             gulp.src('plugins/' + plugin + '/editor/plugin.js')
-            .pipe(minify({
-                minify: true,
-                collapseWhitespace: true,
-                conservativeCollapse: true,
-                minifyJS: true,
-                minifyCSS: true,
-                mangle: false
-            }))
-            .pipe(rename('plugin.min.js'))
-            .pipe(gulp.dest('plugins/' + plugin + '/editor'))
+                .pipe(minify({
+                    minify: true,
+                    collapseWhitespace: true,
+                    conservativeCollapse: true,
+                    minifyJS: true,
+                    minifyCSS: true,
+                    mangle: false
+                }))
+                .pipe(rename('plugin.min.js'))
+                .pipe(gulp.dest('plugins/' + plugin + '/editor'))
         );
     });
     return mergeStream(tasks);
 });
 
-gulp.task('copystyleImages', function() {
-    return gulp.src(['app/styles/images/**/*'], {base: 'app/styles/'})
+gulp.task('copystyleImages', function () {
+    return gulp.src(['app/styles/images/**/*'], { base: 'app/styles/' })
         .pipe(gulp.dest('generic-editor/styles'));
 });
 
-gulp.task('clean', function() {
-    return gulp.src(['generic-editor/scripts/*.js', 'generic-editor/styles/*.css'], {read: false})
+gulp.task('clean', function () {
+    return gulp.src(['generic-editor/scripts/*.js', 'generic-editor/styles/*.css'], { read: false })
         .pipe(clean());
 });
 
-gulp.task("clone-plugins", function(done) {
-    git.clone('https://github.com/project-sunbird/sunbird-content-plugins.git', {args: '-b '+ branchName +' ./plugins'}, function (err) {
+gulp.task("clone-plugins", function (done) {
+    git.clone('https://github.com/JeraldJF/sunbird-content-plugins.git', { args: '-b ' + branchName + ' ./plugins' }, function (err) {
         if (err) {
             done(err);
             return;
@@ -247,20 +247,20 @@ gulp.task('packageCorePlugins', gulp.series(
         if (fs.existsSync('generic-editor/scripts/coreplugins.js')) {
             fs.unlinkSync('generic-editor/scripts/coreplugins.js');
         }
-        corePlugins.forEach(function(plugin) {
+        corePlugins.forEach(function (plugin) {
             var manifest = JSON.parse(fs.readFileSync('plugins/' + plugin + '/manifest.json'));
             if (manifest.editor.dependencies) {
-                manifest.editor.dependencies.forEach(function(dependency) {
+                manifest.editor.dependencies.forEach(function (dependency) {
                     var resource = '/content-plugins/' + plugin + '/' + dependency.src;
                     if (dependency.type == 'js') {
-                        fs.appendFile('generic-editor/scripts/coreplugins.js', "org.ekstep.pluginframework.resourceManager.loadExternalResource('" + resource + "', 'js')" + "\n", function(){});
+                        fs.appendFile('generic-editor/scripts/coreplugins.js', "org.ekstep.pluginframework.resourceManager.loadExternalResource('" + resource + "', 'js')" + "\n", function () { });
                     } else if (dependency.type == 'css') {
-                        fs.appendFile('generic-editor/scripts/coreplugins.js', "org.ekstep.pluginframework.resourceManager.loadExternalResource('" + resource + "', 'css')" + "\n", function(){});
+                        fs.appendFile('generic-editor/scripts/coreplugins.js', "org.ekstep.pluginframework.resourceManager.loadExternalResource('" + resource + "', 'css')" + "\n", function () { });
                     }
                 });
             }
             var pluginContent = fs.readFileSync('plugins/' + plugin + '/editor/plugin.min.js', 'utf8');
-            fs.appendFile('generic-editor/scripts/coreplugins.js', 'org.ekstep.pluginframework.pluginManager.registerPlugin(' + JSON.stringify(manifest) + ',eval(\'' + pluginContent.replace(/'/g, "\\'") + '\'))' + '\n', function(){});
+            fs.appendFile('generic-editor/scripts/coreplugins.js', 'org.ekstep.pluginframework.pluginManager.registerPlugin(' + JSON.stringify(manifest) + ',eval(\'' + pluginContent.replace(/'/g, "\\'") + '\'))' + '\n', function () { });
         });
         return gulp.src('plugins/**/plugin.min.js', {
             read: false
@@ -276,10 +276,10 @@ gulp.task('packageCorePluginsLocal', gulp.series(
         if (fs.existsSync('app/scripts/coreplugins.js')) {
             fs.unlinkSync('app/scripts/coreplugins.js');
         }
-        corePlugins.forEach(function(plugin) {
+        corePlugins.forEach(function (plugin) {
             var manifest = JSON.parse(fs.readFileSync('plugins/' + plugin + '/manifest.json'));
             if (manifest.editor.dependencies) {
-                manifest.editor.dependencies.forEach(function(dependency) {
+                manifest.editor.dependencies.forEach(function (dependency) {
                     var resource = '/plugins/' + plugin + '/' + dependency.src;
                     if (dependency.type == 'js') {
                         fs.appendFile('app/scripts/coreplugins.js', "org.ekstep.pluginframework.resourceManager.loadExternalResource('" + resource + "', 'js')" + "\n");
